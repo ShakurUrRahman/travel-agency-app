@@ -27,12 +27,18 @@
 // import { redirect } from "react-router";
 
 import { Header, StatsCard, TripCard } from "components";
+import { getUser } from "~/appwrite/auth";
 import { dashboardStats, user, users, allTrips } from "~/constants";
+import type { Route } from "./+types/dashboard";
 
 const { totalUsers, usersJoined, totalTrips, tripsCreated, userRole } =
 	dashboardStats;
 
-export const Dashboard = () => {
+export const clientLoader = async () => await getUser();
+
+export const Dashboard = ({ loaderData }: Route.ComponentProps) => {
+	const user = loaderData as User | null;
+
 	// 	const [
 	// 		user,
 	// 		dashboardStats,
