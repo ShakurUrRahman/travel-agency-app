@@ -6,6 +6,7 @@ import {
 import tailwindcss from "@tailwindcss/vite";
 import { defineConfig } from "vite";
 import tsconfigPaths from "vite-tsconfig-paths";
+import devtoolsJson from "vite-plugin-devtools-json";
 
 const sentryConfig: SentryReactRouterBuildOptions = {
 	org: "shakurs-thing",
@@ -22,6 +23,8 @@ export default defineConfig((config) => {
 			tsconfigPaths(),
 			reactRouter(),
 			sentryReactRouter(sentryConfig, config),
+
+			devtoolsJson(),
 		],
 		ssr: {
 			noExternal: [/@syncfusion/],

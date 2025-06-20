@@ -8,9 +8,6 @@ Sentry.init({
 	// https://docs.sentry.io/platforms/javascript/guides/react-router/configuration/options/#sendDefaultPii
 	sendDefaultPii: true,
 
-	// Enable logs to be sent to Sentry
-	_experiments: { enableLogs: true },
-
 	integrations: [nodeProfilingIntegration()],
 	tracesSampleRate: 1.0, // Capture 100% of the transactions
 	profilesSampleRate: 1.0, // profile every transaction

@@ -1,22 +1,22 @@
-// import {
-// 	ColumnsDirective,
-// 	ColumnDirective,
-// 	GridComponent,
-// } from "@syncfusion/ej2-react-grids";
-// import { cn, formatDate } from "~/lib/utils";
-// import { getAllUsers } from "~/appwrite/auth";
-// import type { Route } from "./+types/all-users";
+import {
+	ColumnsDirective,
+	ColumnDirective,
+	GridComponent,
+} from "@syncfusion/ej2-react-grids";
+import { cn, formatDate } from "~/lib/utils";
+import { getAllUsers } from "~/appwrite/auth";
+import type { Route } from "./+types/all-users";
 
 import { Header } from "components";
 
-// export const loader = async () => {
-// 	const { users, total } = await getAllUsers(10, 0);
+export const loader = async () => {
+	const { users, total } = await getAllUsers(10, 0);
 
-// 	return { users, total };
-// };
+	return { users, total };
+};
 
 const AllUsers = ({ loaderData }: Route.ComponentProps) => {
-	// const { users } = loaderData;
+	const { users } = loaderData;
 
 	return (
 		<main className="all-users wrapper">
@@ -24,8 +24,8 @@ const AllUsers = ({ loaderData }: Route.ComponentProps) => {
 				title="Manage Users"
 				description="Filter, sort, and access detailed user profiles"
 			/>
-
-			{/* <GridComponent dataSource={users} gridLines="None">
+			All users page content
+			<GridComponent dataSource={users} gridLines="None">
 				<ColumnsDirective>
 					<ColumnDirective
 						field="name"
@@ -95,7 +95,7 @@ const AllUsers = ({ loaderData }: Route.ComponentProps) => {
 						)}
 					/>
 				</ColumnsDirective>
-			</GridComponent> */}
+			</GridComponent>
 		</main>
 	);
 };
