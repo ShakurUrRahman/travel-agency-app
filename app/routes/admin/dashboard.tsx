@@ -1,112 +1,99 @@
-// import { getAllUsers, getUser } from "~/appwrite/auth";
-// import type { Route } from "./+types/dashboard";
-// import {
-// 	getTripsByTravelStyle,
-// 	getUserGrowthPerDay,
-// 	getUsersAndTripsStats,
-// } from "~/appwrite/dashboard";
-// import { getAllTrips } from "~/appwrite/trips";
-// import { parseTripData } from "~/lib/utils";
-// import {
-// 	Category,
-// 	ChartComponent,
-// 	ColumnSeries,
-// 	DataLabel,
-// 	SeriesCollectionDirective,
-// 	SeriesDirective,
-// 	SplineAreaSeries,
-// 	Tooltip,
-// } from "@syncfusion/ej2-react-charts";
-// import {
-// 	ColumnDirective,
-// 	ColumnsDirective,
-// 	GridComponent,
-// 	Inject,
-// } from "@syncfusion/ej2-react-grids";
-// import { tripXAxis, tripyAxis, userXAxis, useryAxis } from "~/constants";
-// import { redirect } from "react-router";
-
 import { Header, StatsCard, TripCard } from "components";
-import { getUser } from "~/appwrite/auth";
-import { dashboardStats, user, users, allTrips } from "~/constants";
+import { getAllUsers, getUser } from "~/appwrite/auth";
 import type { Route } from "./+types/dashboard";
+import {
+	getTripsByTravelStyle,
+	getUserGrowthPerDay,
+	getUsersAndTripsStats,
+} from "~/appwrite/dashboard";
+import { getAllTrips } from "~/appwrite/trips";
+import { parseTripData } from "~/lib/utils";
 
-const { totalUsers, usersJoined, totalTrips, tripsCreated, userRole } =
-	dashboardStats;
+import { tripXAxis, tripYAxis, userXAxis, userYAxis } from "~/constants";
+import {
+	Category,
+	ChartComponent,
+	ColumnDirective,
+	ColumnsDirective,
+	ColumnSeries,
+	DataLabel,
+	Inject,
+	SeriesCollectionDirective,
+	SeriesDirective,
+	SplineAreaSeries,
+	Tooltip,
+} from "@syncfusion/ej2-react-charts";
+import { GridComponent } from "@syncfusion/ej2-react-grids";
 
-export const clientLoader = async () => await getUser();
+export const clientLoader = async () => {
+	const [
+		user,
+		dashboardStats,
+		trips,
+		userGrowth,
+		tripsByTravelStyle,
+		allUsers,
+	] = await Promise.all([
+		await getUser(),
+		await getUsersAndTripsStats(),
+		await getAllTrips(4, 0),
+		await getUserGrowthPerDay(),
+		await getTripsByTravelStyle(),
+		await getAllUsers(4, 0),
+	]);
 
-export const Dashboard = ({ loaderData }: Route.ComponentProps) => {
-	const user = loaderData as User | null;
+	const allTrips = trips.allTrips.map(({ $id, tripDetails, imageUrls }) => ({
+		id: $id,
+		...parseTripData(tripDetails),
+		imageUrls: imageUrls ?? [],
+	}));
 
-	// 	const [
-	// 		user,
-	// 		dashboardStats,
-	// 		trips,
-	// 		userGrowth,
-	// 		tripsByTravelStyle,
-	// 		allUsers,
-	// 	] = await Promise.all([
-	// 		await getUser(),
-	// 		await getUsersAndTripsStats(),
-	// 		await getAllTrips(4, 0),
-	// 		await getUserGrowthPerDay(),
-	// 		await getTripsByTravelStyle(),
-	// 		await getAllUsers(4, 0),
-	// 	]);
+	const mappedUsers: UsersItineraryCount[] = allUsers.users.map((user) => ({
+		imageUrl: user.imageUrl,
+		name: user.name,
+		count: user.itineraryCount ?? Math.floor(Math.random() * 10),
+	}));
 
-	// 	const allTrips = trips.allTrips.map(({ $id, tripDetails, imageUrls }) => ({
-	// 		id: $id,
-	// 		...parseTripData(tripDetails),
-	// 		imageUrls: imageUrls ?? [],
-	// 	}));
+	return {
+		user,
+		dashboardStats,
+		allTrips,
+		userGrowth,
+		tripsByTravelStyle,
+		allUsers: mappedUsers,
+	};
+};
 
-	// 	const mappedUsers: UsersItineraryCount[] = allUsers.users.map((user) => ({
-	// 		imageUrl: user.imageUrl,
-	// 		name: user.name,
-	// 		count: user.itineraryCount ?? Math.floor(Math.random() * 10),
-	// 	}));
+const Dashboard = ({ loaderData }: Route.ComponentProps) => {
+	const user = loaderData.user as User | null;
+	const {
+		dashboardStats,
+		allTrips,
+		userGrowth,
+		tripsByTravelStyle,
+		allUsers,
+	} = loaderData;
 
-	// 	return {
-	// 		user,
-	// 		dashboardStats,
-	// 		allTrips,
-	// 		userGrowth,
-	// 		tripsByTravelStyle,
-	// 		allUsers: mappedUsers,
-	// 	};
-	// };
+	const trips = allTrips.map((trip) => ({
+		imageUrl: trip.imageUrls[0],
+		name: trip.name,
+		interest: trip.interests,
+	}));
 
-	// const Dashboard = ({ loaderData }: Route.ComponentProps) => {
-	// 	const user = loaderData.user as User | null;
-	// 	const {
-	// 		dashboardStats,
-	// 		allTrips,
-	// 		userGrowth,
-	// 		tripsByTravelStyle,
-	// 		allUsers,
-	// 	} = loaderData;
-
-	// 	const trips = allTrips.map((trip) => ({
-	// 		imageUrl: trip.imageUrls[0],
-	// 		name: trip.name,
-	// 		interest: trip.interests,
-	// 	}));
-
-	// 	const usersAndTrips = [
-	// 		{
-	// 			title: "Latest user signups",
-	// 			dataSource: allUsers,
-	// 			field: "count",
-	// 			headerText: "Trips created",
-	// 		},
-	// 		{
-	// 			title: "Trips based on interests",
-	// 			dataSource: trips,
-	// 			field: "interest",
-	// 			headerText: "Interests",
-	// 		},
-	// 	];
+	const usersAndTrips = [
+		{
+			title: "Latest user signups",
+			dataSource: allUsers,
+			field: "count",
+			headerText: "Trips created",
+		},
+		{
+			title: "Trips based on interests",
+			dataSource: trips,
+			field: "interest",
+			headerText: "Interests",
+		},
+	];
 
 	return (
 		<main className="dashboard wrapper">
@@ -119,21 +106,25 @@ export const Dashboard = ({ loaderData }: Route.ComponentProps) => {
 				<div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full">
 					<StatsCard
 						headerTitle="Total Users"
-						total={totalUsers}
-						currentMonthCount={usersJoined.currentMonth}
-						lastMonthCount={usersJoined.lastMonth}
+						total={dashboardStats.totalUsers}
+						currentMonthCount={
+							dashboardStats.usersJoined.currentMonth
+						}
+						lastMonthCount={dashboardStats.usersJoined.lastMonth}
 					/>
 					<StatsCard
 						headerTitle="Total Trips"
-						total={totalTrips}
-						currentMonthCount={tripsCreated.currentMonth}
-						lastMonthCount={tripsCreated.lastMonth}
+						total={dashboardStats.totalTrips}
+						currentMonthCount={
+							dashboardStats.tripsCreated.currentMonth
+						}
+						lastMonthCount={dashboardStats.tripsCreated.lastMonth}
 					/>
 					<StatsCard
 						headerTitle="Active Users"
-						total={userRole.total}
-						currentMonthCount={userRole.currentMonth}
-						lastMonthCount={userRole.lastMonth}
+						total={dashboardStats.userRole.total}
+						currentMonthCount={dashboardStats.userRole.currentMonth}
+						lastMonthCount={dashboardStats.userRole.lastMonth}
 					/>
 				</div>
 			</section>
@@ -150,18 +141,18 @@ export const Dashboard = ({ loaderData }: Route.ComponentProps) => {
 							name={trip.name!}
 							imageUrl={trip.imageUrls[0]}
 							location={trip.itinerary?.[0]?.location ?? ""}
-							tags={trip.tags}
+							tags={[trip.interests!, trip.travelStyle!]}
 							price={trip.estimatedPrice!}
 						/>
 					))}
 				</div>
 			</section>
-			{/* 
+
 			<section className="grid grid-cols-1 lg:grid-cols-2 gap-5">
 				<ChartComponent
 					id="chart-1"
 					primaryXAxis={userXAxis}
-					primaryYAxis={useryAxis}
+					primaryYAxis={userYAxis}
 					title="User Growth"
 					tooltip={{ enable: true }}
 				>
@@ -201,7 +192,7 @@ export const Dashboard = ({ loaderData }: Route.ComponentProps) => {
 				<ChartComponent
 					id="chart-2"
 					primaryXAxis={tripXAxis}
-					primaryYAxis={tripyAxis}
+					primaryYAxis={tripYAxis}
 					title="Trip Trends"
 					tooltip={{ enable: true }}
 				>
@@ -271,7 +262,7 @@ export const Dashboard = ({ loaderData }: Route.ComponentProps) => {
 						</div>
 					)
 				)}
-			</section> */}
+			</section>
 		</main>
 	);
 };
