@@ -538,3 +538,9 @@ body {
 	top: 45px;
 	right: 40px;
 }
+
+/* Hide Syncfusion license banner */
+.e-error,
+div[style*="position: fixed"][style*="top: 0"] {
+	display: none !important;
+}
